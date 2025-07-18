@@ -1,0 +1,27 @@
+.statistics-view {
+  padding: 20px;
+}
+
+.summary-card {
+  display: flex;
+  justify-content: space-around;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.app.dark .summary-card {
+  background-color: #2a2a2a;
+}
+
+.charts {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.chart {
+  margin: 20px;
+  text-align: center;
+}

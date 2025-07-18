@@ -1,0 +1,106 @@
+.settings-view {
+  padding: 20px;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #ffffff;
+}
+
+.app.dark .settings-section {
+  background-color: #2a2a2a;
+  border-color: #555;
+}
+
+.settings-section h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.app.dark .settings-section h3 {
+  border-bottom-color: #444;
+}
+
+.add-item-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.add-item-form input {
+  flex: 1;
+}
+
+.add-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.add-btn:hover {
+  background: #0056b3;
+}
+
+.app.dark .add-btn {
+  background: #0056b3;
+}
+
+.app.dark .add-btn:hover {
+  background: #004085;
+}
+
+.add-btn svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.items-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.item-pill {
+  display: flex;
+  align-items: center;
+  background-color: #f1f1f1;
+  border-radius: 15px;
+  padding: 5px 12px;
+  font-size: 14px;
+}
+
+.app.dark .item-pill {
+  background-color: #404040;
+}
+
+.item-pill span {
+  margin-right: 8px;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+
+.delete-btn:hover {
+  color: #dc3545;
+}
