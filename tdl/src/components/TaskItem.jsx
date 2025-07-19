@@ -5,6 +5,7 @@ const TaskItem = ({ task, handleStatusChange, handleEdit, handleDelete }) => {
 
   return (
     <div className={`task-item ${isExpanded ? 'expanded' : 'collapsed'}`}>
+      {/* Task header with title and expand/collapse toggle */}
       <div className="task-header" onClick={() => setIsExpanded(!isExpanded)}>
         <h3>{task.title}</h3>
         <button className="collapse-btn">
@@ -13,6 +14,7 @@ const TaskItem = ({ task, handleStatusChange, handleEdit, handleDelete }) => {
           </svg>
         </button>
       </div>
+      {/* Conditional rendering: full details when expanded, brief description when collapsed */}
       {isExpanded ? (
         <div className="task-content">
           <p className="task-description">{task.description}</p>
@@ -23,6 +25,7 @@ const TaskItem = ({ task, handleStatusChange, handleEdit, handleDelete }) => {
               <span key={tag} className="tag">{tag}</span>
             ))}
           </div>
+          {/* Action buttons: status change, edit, and delete */}
           <div className="task-actions">
             <div className="status-buttons">
               {['To-Do', 'In Progress', 'Done'].map(s => (

@@ -51,6 +51,7 @@ const DashboardView = ({
 
   return (
     <div className="dashboard-view">
+      {/* Filter controls for sorting and filtering tasks by status and tags */}
       <div className="filters">
         <select onChange={(e) => setSortBy(e.target.value)}>
           <option value="deadline">Sort by Deadline</option>
@@ -87,6 +88,7 @@ const DashboardView = ({
         </div>
       </div>
 
+      {/* Kanban board with collapsible columns for each task status */}
       <div className="task-board">
         {['To-Do', 'In Progress', 'Done'].map(status => {
           const statusTasks = tasks.filter(task => task.status === status);

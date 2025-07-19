@@ -26,6 +26,7 @@ function App() {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+  // Comprehensive form validation with multiple field checks and error handling
   const validateForm = (formData) => {
     const errors = {};
     
@@ -52,7 +53,7 @@ function App() {
       errors.priority = 'Please select a valid priority';
     }
 
-    // Due date validation
+    // Due date validation - ensures date is not in the past using timezone-safe comparison
     const dueDate = formData.get('dueDate');
     if (dueDate) {
       const selectedDate = new Date(dueDate + 'T00:00:00');
@@ -64,7 +65,7 @@ function App() {
       }
     }
 
-    // Tags validation
+    // Tags validation - checks count and individual tag length limits
     const tagsString = formData.get('tags')?.trim();
     if (tagsString) {
       const tagList = tagsString.split(',').map(tag => tag.trim()).filter(tag => tag);
@@ -87,6 +88,8 @@ function App() {
     setIsSubmitting(false);
   };
 
+  // Generates current date string in YYYY-MM-DD format using local timezone
+  // Avoids timezone issues with toISOString() method
   const getCurrentDateString = () => {
     const now = new Date();
     const year = now.getFullYear();
@@ -111,6 +114,8 @@ function App() {
     document.documentElement.className = theme;
   }, [theme]);
 
+  // Complex filtering and sorting logic for task display
+  // Handles status filtering, tag filtering, and multiple sort options
   const filteredAndSortedTasks = useMemo(() => {
     let filtered = tasks;
     if (filterByStatus) {
@@ -200,6 +205,7 @@ function App() {
         <main className="main-content">{renderView()}</main>
       </div>
       
+      {/* Add Task Modal - Complete form with validation and error handling */}
       {showAddTaskModal && (
         <div className="modal-overlay" onClick={() => { setShowAddTaskModal(false); resetForm(); }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -229,6 +235,7 @@ function App() {
                   return;
                 }
                 
+                // Process form data and create new task object
                 const title = formData.get('title').trim();
                 const description = formData.get('description').trim();
                 const priority = formData.get('priority');
@@ -342,6 +349,7 @@ function App() {
         </div>
       )}
 
+      {/* Edit Task Modal - Pre-populated form for editing existing tasks */}
       {showEditTaskModal && editingTask && (
         <div className="modal-overlay" onClick={() => { setShowEditTaskModal(false); setEditingTask(null); resetForm(); }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -371,6 +379,7 @@ function App() {
                   return;
                 }
                 
+                // Process form data and update existing task
                 const title = formData.get('title').trim();
                 const description = formData.get('description').trim();
                 const priority = formData.get('priority');

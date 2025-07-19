@@ -37,6 +37,7 @@ const SettingsView = ({
   return (
     <div className="settings-view">
       <h2>Settings</h2>
+      {/* Tag management section - add, delete, and view all available tags */}
       <div className="settings-section">
         <h3>Manage Tags</h3>
         <div className="add-item-form">
@@ -62,6 +63,7 @@ const SettingsView = ({
         </div>
       </div>
 
+      {/* Priority management section - add, delete, and view all available priorities */}
       <div className="settings-section">
         <h3>Manage Priorities</h3>
         <div className="add-item-form">

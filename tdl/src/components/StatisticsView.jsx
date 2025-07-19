@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } fro
 import './StatisticsView.css';
 
 const StatisticsView = ({ tasks }) => {
+  // Data preparation for chart visualization - groups tasks by status and priority
   const statusData = [
     { name: 'To-Do', value: tasks.filter((t) => t.status === 'To-Do').length },
     { name: 'In Progress', value: tasks.filter((t) => t.status === 'In Progress').length },
@@ -27,6 +28,7 @@ const StatisticsView = ({ tasks }) => {
         <h3>Total Tasks: {totalTasks}</h3>
         <h3>Completion: {completionPercentage}%</h3>
       </div>
+      {/* Interactive charts for visual task analysis using Recharts library */}
       <div className="charts">
         <div className="chart">
           <h3>Task Status</h3>
