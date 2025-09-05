@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App - Standalone</title>
+    <!-- React and Babel for JSX transformation -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* CSS Variables and Base Styles */
+        :root {
+            --light-bg: #f5f5f5;
+            --light-text: #333333;
+            --dark-bg: #1c1c1c;
+            --dark-text: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* App Container Styles */
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .app.light {
+            background-color: var(--light-bg);
+            color: var(--light-text);
+        }
+
+        .app.dark {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        /* Header Styles */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .app.dark .app-header {
+            border-bottom-color: #555;
+        }
+
+        .app-header h1 {
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .add-task-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .add-task-btn:hover {
+            background: #0056b3;
+        }
+
+        .app.dark .add-task-btn {
+            background: #0056b3;
+        }
+
+        .app.dark .add-task-btn:hover {
+            background: #004085;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .app.dark .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Body and Layout */
+        .app-body {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 200px;
+            border-right: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .app.dark .sidebar {
+            border-right-color: #555;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .sidebar li:hover {
+            background-color: #eee;
+        }
+
+        .app.dark .sidebar li:hover {
+            background-color: #404040;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+        }
+
+        /* Form Elements */
+        button {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e9ecef;
+        }
+
+        input, textarea, select {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+            font-family: inherit;
+            background-color: #ffffff;
+            color: #333333;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        /* Dark mode styles for form elements */
+        .app.dark input,
+        .app.dark textarea,
+        .app.dark select {
+            background-color: #2d2d2d;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        .app.dark input:focus,
+        .app.dark textarea:focus,
+        .app.dark select:focus {
+            border-color: #4a90e2;
+        }
+
+        .app.dark button {
+            background-color: #404040;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        .app.dark button:hover {
+            background-color: #505050;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--light-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .app.dark .modal-content {
+            background: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 1.5rem 0 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+
+        .app.dark .modal-header {
+            border-bottom-color: #404040;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--light-text);
+        }
+
+        .app.dark .modal-header h2 {
+            color: var(--dark-text);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            color: var(--light-text);
+        }
+
+        .app.dark .modal-close {
+            color: var(--dark-text);
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+        }
+
+        .app.dark .modal-close:hover {
+            background: #404040;
+        }
+
+        .modal-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--light-text);
+        }
+
+        .app.dark .form-group label {
+            color: var(--dark-text);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+            color: var(--light-text);
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input.error,
+        .form-group textarea.error,
+        .form-group select.error {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .app.dark .form-group input.error,
+        .app.dark .form-group textarea.error,
+        .app.dark .form-group select.error {
+            border-color: #ff6b6b;
+            background-color: #2a1f1f;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .app.dark .error-message {
+            color: #ff6b6b;
+        }
+
+        .form-help {
+            color: #6c757d;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .app.dark .form-help {
+            color: #adb5bd;
+        }
+
+        .app.dark .form-group input,
+        .app.dark .form-group textarea,
+        .app.dark .form-group select {
+            background: #2a2a2a;
+            border-color: #505050;
+            color: var(--dark-text);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .app.dark .modal-actions {
+            border-top-color: #404040;
+        }
+
+        .btn-cancel,
+        .btn-primary {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:disabled,
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #d0d0d0;
+        }
+
+        .btn-cancel:hover {
+            background: #e9ecef;
+        }
+
+        .app.dark .btn-cancel {
+            background: #404040;
+            color: var(--dark-text);
+            border-color: #505050;
+        }
+
+        .app.dark .btn-cancel:hover {
+            background: #4a4a4a;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        /* Dashboard View Styles */
+        .dashboard-view {
+            padding: 10px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-view {
+                padding: 20px;
+            }
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .filters select {
+            margin-right: 10px;
+            padding: 8px;
+        }
+
+        .tag-filters {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .app.dark .filter-label {
+            color: #e0e0e0;
+        }
+
+        .tag-filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-filter-btn {
+            padding: 0.4rem 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            background: white;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag-filter-btn:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+
+        .tag-filter-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .app.dark .tag-filter-btn {
+            background: #2a2a2a;
+            border-color: #555;
+            color: #aaa;
+        }
+
+        .app.dark .tag-filter-btn:hover {
+            border-color: #0056b3;
+            background: #1a1a2e;
+        }
+
+        .app.dark .tag-filter-btn.active {
+            background: #0056b3;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .clear-tags-btn {
+            padding: 0.4rem 0.8rem;
+            border: 2px solid #dc3545;
+            border-radius: 20px;
+            background: white;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .clear-tags-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .app.dark .clear-tags-btn {
+            background: #2a2a2a;
+            border-color: #dc3545;
+        }
+
+        .app.dark .clear-tags-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Task Board Styles */
+        .task-board {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            min-width: min-content;
+            overflow-x: auto;
+            padding: 0 10px;
+        }
+
+        .task-column {
+            flex: 1;
+            min-width: 320px;
+            max-width: 400px;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .task-column.collapsed {
+            min-width: 360px;
+            flex: 0 0 360px;
+        }
+
+        .app.dark .task-column {
+            background-color: #2a2a2a;
+        }
+
+        .task-column h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .column-header {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .column-toggle-btn {
+            background: none !important;
+            border: none;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: all 0.2s ease;
+            padding: 0 !important;
+            flex-shrink: 0;
+        }
+
+        .app.dark .column-toggle-btn {
+            color: #aaa;
+        }
+
+        .column-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .app.dark .column-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .column-toggle-btn svg {
+            width: 24px !important;
+            height: 24px !important;
+            display: block !important;
+            flex-shrink: 0;
+            min-width: 24px;
+            min-height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.expanded {
+            transform: rotate(0deg);
+        }
+
+        .toggle-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .task-column.collapsed .task-list {
+            display: none;
+        }
+
+        .app.dark .task-column h2 {
+            border-bottom-color: #444;
+        }
+
+        .task-count {
+            font-size: 0.8em;
+            font-weight: normal;
+            color: #666;
+            background: #f0f0f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            min-width: 1.5rem;
+            text-align: center;
+        }
+
+        .app.dark .task-count {
+            color: #aaa;
+            background: #404040;
+        }
+
+        /* Task Item Styles */
+        .task-list .task-item {
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #ffffff;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .app.dark .task-item {
+            background-color: #2a2a2a;
+            border-color: #555;
+        }
+
+        .task-item.collapsed {
+            min-height: 80px;
+        }
+
+        .task-item.expanded {
+            min-height: auto;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0.5rem;
+        }
+
+        .app.dark .task-header {
+            border-bottom-color: #555;
+        }
+
+        .task-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .collapse-btn {
+            background: none !important;
+            border: none;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: all 0.2s ease;
+            padding: 0 !important;
+            flex-shrink: 0;
+        }
+
+        .app.dark .collapse-btn {
+            color: #aaa;
+        }
+
+        .collapse-btn:hover {
+            background: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .app.dark .collapse-btn:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .collapse-btn svg {
+            width: 24px !important;
+            height: 24px !important;
+            display: block !important;
+            flex-shrink: 0;
+            min-width: 24px;
+            min-height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .task-content {
+            display: block;
+        }
+
+        .task-description {
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .app.dark .task-description {
+            background-color: #2a2a2a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+
+        .collapsed-description {
+            color: #666;
+            font-size: 0.9em;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 1.2em;
+            line-height: 1.2em;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .app.dark .collapsed-description {
+            color: #aaa;
+        }
+
+        .task-item .tags .tag {
+            padding: 3px 8px;
+            border-radius: 3px;
+            background-color: #eee;
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        .app.dark .task-item .tags .tag {
+            background-color: #404040;
+            color: #e0e0e0;
+        }
+
+        .task-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .status-btn {
+            background-color: #e9ecef;
+            border: 1px solid #dee2e6;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .status-btn.active[data-status="Done"] {
+            background-color: #4FFF72;
+            color: #000;
+            border-color: #4FFF72;
+        }
+
+        .status-btn.active[data-status="In Progress"] {
+            background-color: #BF9346;
+            color: #fff;
+            border-color: #BF9346;
+        }
+
+        .app.dark .status-btn.active[data-status="Done"] {
+            background-color: #4aa860;
+        }
+
+        .app.dark .status-btn.active[data-status="In Progress"] {
+            background-color: #a37d3a;
+        }
+
+        .task-actions button {
+            margin-left: 10px;
+        }
+
+        /* Settings View Styles */
+        .settings-view {
+            padding: 20px;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+
+        .app.dark .settings-section {
+            background-color: #2a2a2a;
+            border-color: #555;
+        }
+
+        .settings-section h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .app.dark .settings-section h3 {
+            border-bottom-color: #444;
+        }
+
+        .add-item-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-item-form input {
+            flex: 1;
+        }
+
+        .add-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            min-height: 40px;
+        }
+
+        .add-btn:hover {
+            background: #0056b3;
+        }
+
+        .app.dark .add-btn {
+            background: #0056b3;
+        }
+
+        .app.dark .add-btn:hover {
+            background: #004085;
+        }
+
+        .add-btn svg {
+            width: 24px;
+            height: 24px;
+            display: block;
+        }
+
+        .items-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .item-pill {
+            display: flex;
+            align-items: center;
+            background-color: #f1f1f1;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 14px;
+        }
+
+        .app.dark .item-pill {
+            background-color: #404040;
+        }
+
+        .item-pill span {
+            margin-right: 8px;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .delete-btn:hover {
+            color: #dc3545;
+        }
+
+        /* Statistics View Styles */
+        .statistics-view {
+            padding: 20px;
+        }
+
+        .summary-card {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .app.dark .summary-card {
+            background-color: #2a2a2a;
+        }
+
+        .charts {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .chart {
+            margin: 20px;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 1rem;
+                max-width: calc(100% - 2rem);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                width: 250px;
+                height: 100%;
+                background-color: var(--light-bg);
+                z-index: 1000;
+                padding-top: 60px;
+            }
+
+            .app.dark .sidebar {
+                background-color: var(--dark-bg);
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .task-board {
+                flex-direction: column;
+                gap: 15px;
+                padding: 0 5px;
+            }
+
+            .task-column {
+                flex: none;
+                min-width: unset;
+                max-width: unset;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .task-column.collapsed {
+                min-width: unset;
+                width: 100%;
+                flex: none;
+                padding-bottom: 15px;
+            }
+
+            .column-toggle-btn {
+                display: flex !important;
+            }
+
+            .task-column h2 {
+                cursor: pointer;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .column-toggle-btn {
+                display: none !important;
+            }
+
+            .task-column h2 {
+                cursor: default;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        // Custom hook for managing localStorage with React state synchronization
+        function useLocalStorage(key, initialValue) {
+            const [storedValue, setStoredValue] = useState(() => {
+                try {
+                    const item = window.localStorage.getItem(key);
+                    return item ? JSON.parse(item) : initialValue;
+                } catch (error) {
+                    console.log(error);
+                    return initialValue;
+                }
+            });
+
+            const setValue = (value) => {
+                try {
+                    const valueToStore = value instanceof Function ? value(storedValue) : value;
+                    setStoredValue(valueToStore);
+                    window.localStorage.setItem(key, JSON.stringify(valueToStore));
+                } catch (error) {
+                    console.log(error);
+                }
+            };
+
+            return [storedValue, setValue];
+        }
+
+        // TaskItem Component - Individual task display with expand/collapse functionality
+        const TaskItem = ({ task, handleStatusChange, handleEdit, handleDelete }) => {
+            const [isExpanded, setIsExpanded] = useState(true);
+
+            return (
+                <div className={`task-item ${isExpanded ? 'expanded' : 'collapsed'}`}>
+                    <div className="task-header" onClick={() => setIsExpanded(!isExpanded)}>
+                        <h3>{task.title}</h3>
+                        <button className="collapse-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" className={`toggle-icon ${isExpanded ? 'expanded' : 'collapsed'}`}>
+                                <path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {isExpanded ? (
+                        <div className="task-content">
+                            <p className="task-description">{task.description}</p>
+                            <p>Priority: {task.priority}</p>
+                            <p>Deadline: {task.deadline}</p>
+                            <div className="tags">
+                                {task.tags.map((tag) => (
+                                    <span key={tag} className="tag">{tag}</span>
+                                ))}
+                            </div>
+                            <div className="task-actions">
+                                <div className="status-buttons">
+                                    {['To-Do', 'In Progress', 'Done'].map(s => (
+                                        <button
+                                            key={s}
+                                            className={`status-btn ${task.status === s ? 'active' : ''}`}
+                                            onClick={() => handleStatusChange(task.id, s)}
+                                            data-status={s}
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button onClick={() => handleEdit(task)}>Edit</button>
+                                <button onClick={() => handleDelete(task.id)}>Delete</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="collapsed-description">{task.description}</p>
+                    )}
+                </div>
+            );
+        };
+
+        // DashboardView Component - Main kanban board with task columns and filtering
+        const DashboardView = ({
+            tasks = [],
+            tags = [],
+            onEditTask,
+            onDeleteTask,
+            onTaskStatusChange,
+        }) => {
+            const [collapsedColumns, setCollapsedColumns] = useState({
+                'To-Do': false,
+                'In Progress': false,
+                'Done': false
+            });
+            const [selectedTag, setSelectedTag] = useState('All');
+
+            const toggleColumn = (status) => {
+                setCollapsedColumns(prev => ({
+                    ...prev,
+                    [status]: !prev[status]
+                }));
+            };
+
+            const filteredTasks = useMemo(() => {
+                if (selectedTag === 'All') {
+                    return tasks;
+                }
+                return tasks.filter(task => task.tags && task.tags.includes(selectedTag));
+            }, [tasks, selectedTag]);
+
+            const getTasksByStatus = (status) => {
+                return filteredTasks.filter(task => task.status === status);
+            };
+
+            const handleEdit = (task) => {
+                if (onEditTask) {
+                    onEditTask(task);
+                }
+            };
+
+            const handleDelete = (id) => {
+                if (onDeleteTask) {
+                    onDeleteTask(id);
+                }
+            };
+
+            const handleStatusChange = (id, status) => {
+                if (onTaskStatusChange) {
+                    onTaskStatusChange(id, status);
+                }
+            };
+
+            const statuses = ['To-Do', 'In Progress', 'Done'];
+
+            return (
+                <div className="dashboard-view">
+                    <div className="filters">
+                        <div className="tag-filters">
+                            <label htmlFor="tag-filter">Filter by Tag:</label>
+                            <select 
+                                id="tag-filter"
+                                value={selectedTag} 
+                                onChange={(e) => setSelectedTag(e.target.value)}
+                            >
+                                <option value="All">All Tags</option>
+                                {tags.map((tag) => (
+                                    <option key={tag} value={tag}>{tag}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="task-board">
+                        {statuses.map(status => {
+                            const statusTasks = getTasksByStatus(status);
+                            const count = statusTasks.length;
+                            const isCollapsed = collapsedColumns[status];
+                            
+                            return (
+                                <div key={status} className={`task-column ${isCollapsed ? 'collapsed' : ''}`}>
+                                    <h2 onClick={() => toggleColumn(status)} className="column-header">
+                                        {status} 
+                                        <span className="task-count">({count})</span>
+                                        <button className="column-toggle-btn" onClick={(e) => { e.stopPropagation(); toggleColumn(status); }}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor" className={`toggle-icon ${isCollapsed ? 'collapsed' : 'expanded'}`}>
+                                                <path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/>
+                                            </svg>
+                                        </button>
+                                    </h2>
+                                    {!isCollapsed && (
+                                        <div className="task-list">
+                                            {statusTasks.map(task => (
+                                                <TaskItem
+                                                    key={task.id}
+                                                    task={task}
+                                                    handleStatusChange={handleStatusChange}
+                                                    handleEdit={handleEdit}
+                                                    handleDelete={handleDelete}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        // SettingsView Component - Manage tags and priorities
+        const SettingsView = ({
+            tags,
+            setTags,
+            priorities,
+            setPriorities,
+        }) => {
+            const [newTag, setNewTag] = useState('');
+            const [newPriority, setNewPriority] = useState('');
+
+            const handleAddTag = () => {
+                if (newTag && !tags.includes(newTag)) {
+                    setTags([...tags, newTag]);
+                    setNewTag('');
+                }
+            };
+
+            const handleDeleteTag = (tagToDelete) => {
+                setTags(tags.filter((tag) => tag !== tagToDelete));
+            };
+
+            const handleAddPriority = () => {
+                if (newPriority && !priorities.includes(newPriority)) {
+                    setPriorities([...priorities, newPriority]);
+                    setNewPriority('');
+                }
+            };
+
+            const handleDeletePriority = (priorityToDelete) => {
+                if (priorities.length > 1) {
+                    setPriorities(priorities.filter((p) => p !== priorityToDelete));
+                }
+            };
+
+            return (
+                <div className="settings-view">
+                    <h2>Settings</h2>
+                    <div className="settings-section">
+                        <h3>Manage Tags</h3>
+                        <div className="add-item-form">
+                            <input
+                                type="text"
+                                value={newTag}
+                                onChange={(e) => setNewTag(e.target.value)}
+                                placeholder="New tag"
+                            />
+                            <button onClick={handleAddTag} className="add-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="items-list">
+                            {tags.map((tag) => (
+                                <div key={tag} className="item-pill">
+                                    <span>{tag}</span>
+                                    <button onClick={() => handleDeleteTag(tag)} className="delete-btn">×</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="settings-section">
+                        <h3>Manage Priorities</h3>
+                        <div className="add-item-form">
+                            <input
+                                type="text"
+                                value={newPriority}
+                                onChange={(e) => setNewPriority(e.target.value)}
+                                placeholder="New priority"
+                            />
+                            <button onClick={handleAddPriority} className="add-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="items-list">
+                            {priorities.map((p) => (
+                                <div key={p} className="item-pill">
+                                    <span>{p}</span>
+                                    {priorities.length > 1 && (
+                                        <button onClick={() => handleDeletePriority(p)} className="delete-btn">×</button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // StatisticsView Component - Display task statistics and completion metrics
+        const StatisticsView = ({ tasks }) => {
+            const statusData = [
+                { name: 'To-Do', value: tasks.filter((t) => t.status === 'To-Do').length },
+                { name: 'In Progress', value: tasks.filter((t) => t.status === 'In Progress').length },
+                { name: 'Done', value: tasks.filter((t) => t.status === 'Done').length },
+            ];
+
+            const priorityData = [
+                { name: 'Low', count: tasks.filter((t) => t.priority === 'Low').length },
+                { name: 'Medium', count: tasks.filter((t) => t.priority === 'Medium').length },
+                { name: 'High', count: tasks.filter((t) => t.priority === 'High').length },
+            ];
+
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter((t) => t.status === 'Done').length;
+            const completionPercentage = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(2) : 0;
+
+            return (
+                <div className="statistics-view">
+                    <h2>Statistics</h2>
+                    <div className="summary-card">
+                        <h3>Total Tasks: {totalTasks}</h3>
+                        <h3>Completion: {completionPercentage}%</h3>
+                    </div>
+                    <div className="charts">
+                        <div className="chart">
+                            <h3>Task Status Distribution</h3>
+                            <ul>
+                                {statusData.map((data) => (
+                                    <li key={data.name}>{data.name}: {data.value}</li>
+                                ))}
+                            </ul>
+                        </div>
+                        <div className="chart">
+                            <h3>Priority Distribution</h3>
+                            <ul>
+                                {priorityData.map((data) => (
+                                    <li key={data.name}>{data.name}: {data.count}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const [tasks, setTasks] = useLocalStorage('tasks', []);
+            const [tags, setTags] = useLocalStorage('tags', ['Work', 'Personal', 'Urgent']);
+            const [priorities, setPriorities] = useLocalStorage('priorities', ['Low', 'Medium', 'High']);
+            const [activeView, setActiveView] = useState('dashboard');
+            const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+            const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+            const [editingTask, setEditingTask] = useState(null);
+            const [formData, setFormData] = useState({
+                title: '',
+                description: '',
+                priority: 'Medium',
+                tags: [],
+                status: 'To-Do',
+                dueDate: ''
+            });
+            const [errors, setErrors] = useState({});
+
+            const validateForm = (data) => {
+                const newErrors = {};
+                if (!data.title?.trim()) {
+                    newErrors.title = 'Title is required';
+                } else if (data.title.trim().length > 100) {
+                    newErrors.title = 'Title must be 100 characters or less';
+                }
+                if (data.description && data.description.length > 500) {
+                    newErrors.description = 'Description must be 500 characters or less';
+                }
+                if (!priorities.includes(data.priority)) {
+                    newErrors.priority = 'Please select a valid priority';
+                }
+                const validStatuses = ['To-Do', 'In Progress', 'Done'];
+                if (!validStatuses.includes(data.status)) {
+                    newErrors.status = 'Please select a valid status';
+                }
+                if (data.dueDate) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const selectedDate = new Date(data.dueDate + 'T00:00:00');
+                    if (selectedDate < today) {
+                        newErrors.dueDate = 'Due date cannot be in the past';
+                    }
+                }
+                return newErrors;
+            };
+
+            const getCurrentDateString = () => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            const resetFormData = () => {
+                setFormData({
+                    title: '',
+                    description: '',
+                    priority: 'Medium',
+                    tags: [],
+                    status: 'To-Do',
+                    dueDate: ''
+                });
+                setErrors({});
+            };
+
+            const handleOpenAddModal = () => {
+                resetFormData();
+                setIsAddModalOpen(true);
+            };
+
+            const handleEditTask = (task) => {
+                setEditingTask(task);
+                setFormData({
+                    title: task.title,
+                    description: task.description,
+                    priority: task.priority,
+                    tags: task.tags,
+                    status: task.status,
+                    dueDate: task.dueDate || ''
+                });
+                setErrors({});
+                setIsEditModalOpen(true);
+            };
+
+            const handleCloseModal = () => {
+                setIsAddModalOpen(false);
+                setIsEditModalOpen(false);
+                setEditingTask(null);
+                resetFormData();
+            };
+
+            const handleInputChange = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+                if (errors[field]) {
+                    setErrors(prev => ({ ...prev, [field]: '' }));
+                }
+            };
+
+            const handleTagToggle = (tag) => {
+                setFormData(prev => ({
+                    ...prev,
+                    tags: prev.tags.includes(tag)
+                        ? prev.tags.filter(t => t !== tag)
+                        : [...prev.tags, tag]
+                }));
+            };
+
+            const handleAddTask = () => {
+                const validationErrors = validateForm(formData);
+                if (Object.keys(validationErrors).length > 0) {
+                    setErrors(validationErrors);
+                    return;
+                }
+                const newTask = {
+                    id: Date.now(),
+                    ...formData,
+                    createdAt: new Date().toISOString()
+                };
+                setTasks(prev => [...prev, newTask]);
+                handleCloseModal();
+            };
+
+            const handleUpdateTask = () => {
+                const validationErrors = validateForm(formData);
+                if (Object.keys(validationErrors).length > 0) {
+                    setErrors(validationErrors);
+                    return;
+                }
+                setTasks(prev => prev.map(task => 
+                    task.id === editingTask.id 
+                        ? { ...task, ...formData }
+                        : task
+                ));
+                handleCloseModal();
+            };
+
+            const handleDeleteTask = (taskId) => {
+                setTasks(prev => prev.filter(task => task.id !== taskId));
+            };
+
+            const handleTaskStatusChange = (taskId, newStatus) => {
+                setTasks(prev => prev.map(task => 
+                    task.id === taskId 
+                        ? { ...task, status: newStatus }
+                        : task
+                ));
+            };
+
+            const renderView = () => {
+                switch (activeView) {
+                    case 'dashboard':
+                        return (
+                            <DashboardView
+                                tasks={tasks}
+                                tags={tags}
+                                onEditTask={handleEditTask}
+                                onDeleteTask={handleDeleteTask}
+                                onTaskStatusChange={handleTaskStatusChange}
+                            />
+                        );
+                    case 'settings':
+                        return (
+                            <SettingsView
+                                tags={tags}
+                                setTags={setTags}
+                                priorities={priorities}
+                                setPriorities={setPriorities}
+                            />
+                        );
+                    case 'statistics':
+                        return <StatisticsView tasks={tasks} />;
+                    default:
+                        return (
+                            <DashboardView
+                                tasks={tasks}
+                                tags={tags}
+                                onEditTask={handleEditTask}
+                                onDeleteTask={handleDeleteTask}
+                                onTaskStatusChange={handleTaskStatusChange}
+                            />
+                        );
+                }
+            };
+
+            return (
+                <div className="app">
+                    <nav className="navbar">
+                        <h1 className="app-title">To-Do List Manager</h1>
+                        <div className="nav-buttons">
+                            <button
+                                className={`nav-btn ${activeView === 'dashboard' ? 'active' : ''}`}
+                                onClick={() => setActiveView('dashboard')}
+                            >
+                                Dashboard
+                            </button>
+                            <button
+                                className={`nav-btn ${activeView === 'statistics' ? 'active' : ''}`}
+                                onClick={() => setActiveView('statistics')}
+                            >
+                                Statistics
+                            </button>
+                            <button
+                                className={`nav-btn ${activeView === 'settings' ? 'active' : ''}`}
+                                onClick={() => setActiveView('settings')}
+                            >
+                                Settings
+                            </button>
+                            <button className="add-task-btn" onClick={handleOpenAddModal}>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="currentColor">
+                                    <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>
+                                </svg>
+                                Add Task
+                            </button>
+                        </div>
+                    </nav>
+
+                    <main className="main-content">
+                        {renderView()}
+                    </main>
+
+                    {isAddModalOpen && (
+                        <div className="modal-overlay" onClick={handleCloseModal}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>Add New Task</h2>
+                                    <button className="close-btn" onClick={handleCloseModal}>×</button>
+                                </div>
+                                <div className="modal-content">
+                                    <div className="form-group">
+                                        <label htmlFor="title">Title *</label>
+                                        <input
+                                            id="title"
+                                            type="text"
+                                            value={formData.title}
+                                            onChange={(e) => handleInputChange('title', e.target.value)}
+                                            placeholder="Enter task title"
+                                            className={errors.title ? 'error' : ''}
+                                        />
+                                        {errors.title && <span className="error-message">{errors.title}</span>}
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="description">Description</label>
+                                        <textarea
+                                            id="description"
+                                            value={formData.description}
+                                            onChange={(e) => handleInputChange('description', e.target.value)}
+                                            placeholder="Enter task description"
+                                            rows="3"
+                                            className={errors.description ? 'error' : ''}
+                                        ></textarea>
+                                        {errors.description && <span className="error-message">{errors.description}</span>}
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="priority">Priority</label>
+                                            <select
+                                                id="priority"
+                                                value={formData.priority}
+                                                onChange={(e) => handleInputChange('priority', e.target.value)}
+                                                className={errors.priority ? 'error' : ''}
+                                            >
+                                                {priorities.map(p => (
+                                                    <option key={p} value={p}>{p}</option>
+                                                ))}
+                                            </select>
+                                            {errors.priority && <span className="error-message">{errors.priority}</span>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="dueDate">Due Date</label>
+                                            <input
+                                                id="dueDate"
+                                                type="date"
+                                                value={formData.dueDate}
+                                                onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                                                min={getCurrentDateString()}
+                                                className={errors.dueDate ? 'error' : ''}
+                                            />
+                                            {errors.dueDate && <span className="error-message">{errors.dueDate}</span>}
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Tags</label>
+                                        <div className="tags-container">
+                                            {tags.map(tag => (
+                                                <label key={tag} className="tag-checkbox">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.tags.includes(tag)}
+                                                        onChange={() => handleTagToggle(tag)}
+                                                    />
+                                                    {tag}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="cancel-btn" onClick={handleCloseModal}>Cancel</button>
+                                    <button className="submit-btn" onClick={handleAddTask}>Add Task</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {isEditModalOpen && (
+                        <div className="modal-overlay" onClick={handleCloseModal}>
+                            <div className="modal" onClick={(e) => e.stopPropagation()}>
+                                <div className="modal-header">
+                                    <h2>Edit Task</h2>
+                                    <button className="close-btn" onClick={handleCloseModal}>×</button>
+                                </div>
+                                <div className="modal-content">
+                                    <div className="form-group">
+                                        <label htmlFor="edit-title">Title *</label>
+                                        <input
+                                            id="edit-title"
+                                            type="text"
+                                            value={formData.title}
+                                            onChange={(e) => handleInputChange('title', e.target.value)}
+                                            placeholder="Enter task title"
+                                            className={errors.title ? 'error' : ''}
+                                        />
+                                        {errors.title && <span className="error-message">{errors.title}</span>}
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="edit-description">Description</label>
+                                        <textarea
+                                            id="edit-description"
+                                            value={formData.description}
+                                            onChange={(e) => handleInputChange('description', e.target.value)}
+                                            placeholder="Enter task description"
+                                            rows="3"
+                                            className={errors.description ? 'error' : ''}
+                                        ></textarea>
+                                        {errors.description && <span className="error-message">{errors.description}</span>}
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="edit-priority">Priority</label>
+                                            <select
+                                                id="edit-priority"
+                                                value={formData.priority}
+                                                onChange={(e) => handleInputChange('priority', e.target.value)}
+                                                className={errors.priority ? 'error' : ''}
+                                            >
+                                                {priorities.map(p => (
+                                                    <option key={p} value={p}>{p}</option>
+                                                ))}
+                                            </select>
+                                            {errors.priority && <span className="error-message">{errors.priority}</span>}
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="edit-status">Status</label>
+                                            <select
+                                                id="edit-status"
+                                                value={formData.status}
+                                                onChange={(e) => handleInputChange('status', e.target.value)}
+                                                className={errors.status ? 'error' : ''}
+                                            >
+                                                <option value="To-Do">To-Do</option>
+                                                <option value="In Progress">In Progress</option>
+                                                <option value="Done">Done</option>
+                                            </select>
+                                            {errors.status && <span className="error-message">{errors.status}</span>}
+                                        </div>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="edit-dueDate">Due Date</label>
+                                        <input
+                                            id="edit-dueDate"
+                                            type="date"
+                                            value={formData.dueDate}
+                                            onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                                            min={getCurrentDateString()}
+                                            className={errors.dueDate ? 'error' : ''}
+                                        />
+                                        {errors.dueDate && <span className="error-message">{errors.dueDate}</span>}
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Tags</label>
+                                        <div className="tags-container">
+                                            {tags.map(tag => (
+                                                <label key={tag} className="tag-checkbox">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={formData.tags.includes(tag)}
+                                                        onChange={() => handleTagToggle(tag)}
+                                                    />
+                                                    {tag}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="modal-footer">
+                                    <button className="cancel-btn" onClick={handleCloseModal}>Cancel</button>
+                                    <button className="submit-btn" onClick={handleUpdateTask}>Update Task</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+</body>
+</html>
