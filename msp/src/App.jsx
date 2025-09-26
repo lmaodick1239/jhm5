@@ -120,10 +120,14 @@ function App() {
           backgroundColor: 'background.default',
           color: 'text.primary',
           p: { xs: 1, sm: 2 },
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
-        <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-          <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+        <Box sx={{ maxWidth: 1200, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Typography variant="h4" sx={{ mb: 1, fontWeight: 700, textAlign: 'center' }}>
             Minesweeper
           </Typography>
           <Paper elevation={0} sx={{ p: 1, mb: 1, backgroundColor: 'background.paper' }}>
@@ -200,22 +204,24 @@ function App() {
             </Stack>
           </Paper>
           <Divider sx={{ mb: 1 }} />
-          <Board
-            key={gameKey}
-            height={gameCfg.height}
-            width={gameCfg.width}
-            mines={gameCfg.mines}
-            cellSize={32}
-            playing={running}
-            onFirstAction={handleFirstAction}
-            onWin={handleWin}
-            onLose={handleLose}
-            focusPos={focusPos}
-            setFocusPos={setFocusPos}
-            gameKey={gameKey}
-            onBoardChange={handleBoardState}
-          />
-          <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Board
+              key={gameKey}
+              height={gameCfg.height}
+              width={gameCfg.width}
+              mines={gameCfg.mines}
+              cellSize={32}
+              playing={running}
+              onFirstAction={handleFirstAction}
+              onWin={handleWin}
+              onLose={handleLose}
+              focusPos={focusPos}
+              setFocusPos={setFocusPos}
+              gameKey={gameKey}
+              onBoardChange={handleBoardState}
+            />
+          </Box>
+          <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary', textAlign: 'center' }}>
             Keyboard: Arrow keys to move, Enter/Space to reveal, F to flag. Right-click to flag.
           </Typography>
         </Box>
