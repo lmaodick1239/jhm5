@@ -1,0 +1,15 @@
+{
+	"name": "tod",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"build": "xcopy /Y index.html public\\ && xcopy /Y app.js public\\ && xcopy /Y kv-storage.js public\\ && xcopy /Y styles.css public\\",
+		"deploy": "npm run build && wrangler deploy",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"wrangler": "^4.36.0"
+	}
+}

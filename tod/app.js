@@ -1,31 +1,65 @@
 // Vanilla JS To-Do / Kanban App (migrated from React implementation)
-// Features: tasks CRUD, per-status columns, sorting, filtering by status & tags, priorities, tags mgmt, statistics, theme toggle, localStorage persistence.
+// Features: tasks CRUD, per-status columns, sorting, filtering by status & tags, priorities, tags mgmt, statistics, theme toggle, Cloudflare KV persistence.
 
 // ========================= State Handling =========================
 const storage = {
-  get(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+  async get(key, fallback) {
+    try { 
+      return await window.kvStorage.get(key, fallback); 
+    } catch (error) { 
+      console.error('Storage get error:', error);
+      return fallback; 
+    }
   },
-  set(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+  async set(key, value) { 
+    try {
+      await window.kvStorage.set(key, value);
+    } catch (error) {
+      console.error('Storage set error:', error);
+    }
+  }
 };
 
 let state = {
-  tasks: storage.get('tasks', []),
-  tags: storage.get('tags', ['Work', 'Personal']),
-  priorities: storage.get('priorities', ['Low', 'Medium', 'High']),
-  theme: storage.get('theme', 'light'),
+  tasks: [],
+  tags: ['Work', 'Personal'],
+  priorities: ['Low', 'Medium', 'High'],
+  theme: 'light',
   view: 'dashboard',
   sortBy: 'deadline',
   filterByStatus: '',
-  filterByTags: storage.get('filterByTags', [])
+  filterByTags: []
 };
 
-function setState(patch) {
+async function initializeState() {
+  try {
+    state.tasks = await storage.get('tasks', []);
+    state.tags = await storage.get('tags', ['Work', 'Personal']);
+    state.priorities = await storage.get('priorities', ['Low', 'Medium', 'High']);
+    state.theme = await storage.get('theme', 'light');
+    state.filterByTags = await storage.get('filterByTags', []);
+  } catch (error) {
+    console.error('Failed to initialize state from KV storage:', error);
+  }
+}
+
+async function setState(patch) {
   state = { ...state, ...patch };
   // Persist changed top-level keys
-  ['tasks','tags','priorities','theme','filterByTags'].forEach(k => {
-    if (k in patch) storage.set(k, state[k]);
-  });
+  const persistKeys = ['tasks','tags','priorities','theme','filterByTags'];
+  const promises = [];
+  for (const k of persistKeys) {
+    if (k in patch) {
+      promises.push(storage.set(k, state[k]));
+    }
+  }
+  
+  try {
+    await Promise.all(promises);
+  } catch (error) {
+    console.error('Failed to persist state changes:', error);
+  }
+  
   render();
 }
 
@@ -369,8 +403,9 @@ function updatePrioritySelect() {
 function capitalize(str){ return str ? str.charAt(0).toUpperCase()+str.slice(1).toLowerCase() : str; }
 
 // Initial adjustments
-function bootstrap(){
+async function bootstrap(){
   try {
+    await initializeState(); // Load state from KV storage
     document.body.classList.add(state.theme);
     const due = qs('#dueDateInput'); if (due) due.min = nowDateString();
     if (modal) modal.hidden = true;
@@ -382,14 +417,16 @@ function bootstrap(){
       sidebar.onclick = e => { const li = e.target.closest('li'); if (!li) return; setState({ view: li.dataset.view }); closeSidebar(); };
       sidebar.onkeydown = e => { if (e.key==='Enter') { const li = e.target.closest('li'); if (li) { setState({ view: li.dataset.view }); closeSidebar(); } } };
     }
-    console.info('[tod] App initialized');
+    console.info('[tod] App initialized with KV storage');
   } catch (err) {
     console.error('[tod] Initialization error:', err);
   }
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrap, { once: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    bootstrap().catch(err => console.error('Bootstrap failed:', err));
+  }, { once: true });
 } else {
-  bootstrap();
+  bootstrap().catch(err => console.error('Bootstrap failed:', err));
 }

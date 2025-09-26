@@ -1,6 +1,7 @@
 # Vanilla To-Do (tod)
 
 Migrated on 2025-09-20 from the React implementation located in `tdl/` to a single-page, framework-free HTML/CSS/JS version.
+Updated on 2025-09-27 to use Cloudflare KV storage instead of browser localStorage.
 
 ## Features
 
@@ -11,34 +12,37 @@ Migrated on 2025-09-20 from the React implementation located in `tdl/` to a sing
 - Custom tag & priority management (Settings view)
 - Basic statistics (counts + simple SVG bar charts) without external libraries
 - Light/Dark theme toggle (persisted)
-- Cloudflare KV persistence for tasks, tags, priorities, theme, tag filters
+- **Cloudflare KV persistence** for tasks, tags, priorities, theme, tag filters
 - Accessible keyboard navigation for sidebar and form inputs
 
 ## Files
 
-- `index.html` – Fully self-contained HTML file with inlined CSS and JavaScript (structure, styling, logic)
+- `index.html` – Structure + modal + root containers
+- `styles.css` – Consolidated styling adapted from original React CSS
+- `app.js` – All application logic (state, rendering, events, persistence)
+- `kv-storage.js` – KV storage service layer for Cloudflare integration
+- `worker/index.js` – Cloudflare Worker backend with API endpoints
+- `wrangler.jsonc` – Cloudflare Worker configuration
+- `package.json` – Dependencies and deployment scripts
 
 ## How to Use
 
-Serve `tod/index.html` from the same origin as the Worker (or expose the Worker at `window.TOD_API_URL`) so the app can call `/api/tod/state`. No build tooling is required, but a deployed Worker with the `TOD_KV` binding must be available.
+### Local Development
+1. Install dependencies: `npm install`
+2. Start development server: `npm run dev`
+3. Open browser to the URL shown in terminal
 
-> Legacy note: `styles.css` and `app.js` remain in the directory for reference but are no longer loaded—`index.html` now contains the complete app inline.
+### Deployment
+1. Build and deploy: `npm run deploy`
+2. Visit your deployed app at the Workers URL
 
 ## Data Persistence
 
-State is stored in the `TOD_KV` namespace via the Cloudflare Worker located in `ttx/worker/index.ts`. The Worker exposes two routes:
-
-- `GET /api/tod/state` – returns the normalized state JSON
-- `PUT /api/tod/state` – replaces the stored state (validated + sanitized server-side)
-
-> Tip: For local development you can run `wrangler dev --local` inside `ttx/` to spin up the Worker and then open `tod/index.html` from a simple static server pointed at the same origin (or set `window.TOD_API_URL` before the script runs).
-
-## Cloudflare Setup
-
-1. Create a Cloudflare KV namespace (e.g. `tod-state`) and note both the production and preview IDs.
-2. Update `ttx/wrangler.jsonc` with those IDs under the `TOD_KV` binding.
-3. Deploy the Worker (`wrangler deploy`) so the `/api/tod/state` endpoint is available to the app.
-4. Optionally set `window.TOD_API_URL = "https://<your-worker-domain>/api/tod/state";` before loading the script if the Worker lives on a different origin.
+Data is now persisted using **Cloudflare KV storage** instead of localStorage:
+- Global state accessible across devices and sessions
+- API endpoint: `/api/tod/state` (GET/PUT operations)
+- Automatic fallback to default state if KV is unavailable
+- Async operations with proper error handling
 
 ## Differences from React Version
 
@@ -46,6 +50,7 @@ State is stored in the `TOD_KV` namespace via the Cloudflare Worker located in `
 - All UI rendering done via direct DOM manipulation
 - No per-column collapse toggle (could be added similarly if needed)
 - Form validation logic ported closely with minimal changes
+- **NEW**: Cloud-based persistence with Cloudflare KV
 
 ## Possible Enhancements
 
@@ -53,5 +58,9 @@ State is stored in the `TOD_KV` namespace via the Cloudflare Worker located in `
 - Column collapse/expand state persistence
 - Improved accessibility for modal focus trap
 - Export/import data (JSON download)
+- User authentication and multi-user support
+- Real-time sync across multiple browser tabs
+
+Deployed at: https://tod.despacito777x.workers.dev
 
 Enjoy!
