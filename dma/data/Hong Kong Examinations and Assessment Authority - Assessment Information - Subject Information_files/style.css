@@ -1,0 +1,81 @@
+﻿/* Skip Wrapper - Start */
+#skipwrapper {
+    top: 0px;
+    display: block;
+    /*position: absolute;*/
+    height:0px;
+}
+
+#skipwrapper a {
+    color: #ffffff;
+}
+
+#skipwrapper a:focus {
+    color: #000000;
+}
+/* Skip Wrapper - End */
+
+/* Site Map - Start */
+th.title_server,
+td.title_server {
+    height: 30px;
+    background: #3c807d;
+    padding-left: 20px;
+    color: #ffffff;
+    line-height: 30px;
+    font-weight: bold;
+}
+
+a.othernewsbold {
+    color: #ffffff;
+}
+/* Site Map - End */
+
+/* Google Map Page - Start */
+div.title_about {
+    height: 60px;
+    font-size: 1.125rem /* 16/14 */;
+    background: #3c807d;
+    color: #ffffff;
+    padding-left: 20px;
+    font-weight: bold;
+    line-height: 60px;
+    text-align: left;
+}
+
+div .paragraph {
+    padding: 10px 20px 10px 20px;
+    /*line-height: 20px;
+    text-align: justify;*/
+}
+
+#gmap-container {
+    position: relative;
+    height: 480px;
+    width: 460px;
+    margin: 0 auto;
+    margin-bottom: 100px;
+}
+
+#gmap {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+/* Google Map Page - End */
+
+.fancybox-container a.closebtn {
+    box-sizing: unset;
+    color: unset;
+    border: none;
+}
+
+
+@media screen and (max-width: 500px) {
+    #gmap-container {
+        width: 90%;
+    }
+}
