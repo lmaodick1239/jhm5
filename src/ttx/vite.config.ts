@@ -5,5 +5,6 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './', // Use relative paths for assets - required for subdirectory deployment
   plugins: [react(), cloudflare()],
 })

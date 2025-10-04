@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Project Portfolio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #333;
+            min-height: 100vh;
+            padding: 2rem;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #333;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-icon {
+            width: 64px;
+            height: 64px;
+            background: #5c5e62;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .project-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+        }
+
+        .project-description {
+            font-size: 0.95rem;
+            color: #718096;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .arrow {
+            margin-top: 1rem;
+            font-size: 1.5rem;
+            color: #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .project-card:hover .arrow {
+            transform: translateX(5px);
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 2rem 0;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h2 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 My Project Portfolio</h1>
+            <p class="subtitle">Explore my collection of projects</p>
+        </header>
+
+        <div class="projects-grid">
+            <!-- PROJECT_CARDS_PLACEHOLDER -->
+
+            <a href="/dma/" class="project-card">
+                <div class="project-icon">🎓</div>
+                <h2 class="project-name">DSE Score Calculator 🎓</h2>
+                <p class="project-description">A modern web application to calculate your Hong Kong Diploma of Secondary Education (HKDSE) score an</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/msp/" class="project-card">
+                <div class="project-icon">⚛️</div>
+                <h2 class="project-name">React + Vite</h2>
+                <p class="project-description">This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/New folder/" class="project-card">
+                <div class="project-icon">🚀</div>
+                <h2 class="project-name">New folder</h2>
+                <p class="project-description">Web application project</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/tdl/" class="project-card">
+                <div class="project-icon">✅</div>
+                <h2 class="project-name">React + Vite</h2>
+                <p class="project-description">This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/tod/" class="project-card">
+                <div class="project-icon">📝</div>
+                <h2 class="project-name">Vanilla To-Do (tod)</h2>
+                <p class="project-description">Migrated on 2025-09-20 from the React implementation located in tdl/ to a single-page, framework-fre</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/ttc/" class="project-card">
+                <div class="project-icon">🎯</div>
+                <h2 class="project-name">React + TypeScript + Vite</h2>
+                <p class="project-description">This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/ttv/" class="project-card">
+                <div class="project-icon">📺</div>
+                <h2 class="project-name">TTV Project</h2>
+                <p class="project-description">Vanilla JavaScript application</p>
+                <span class="arrow">→</span>
+            </a>
+
+            <a href="/ttx/" class="project-card">
+                <div class="project-icon">⚡</div>
+                <h2 class="project-name">Cloudflare Worker – To-Do State API</h2>
+                <p class="project-description">This Worker exposes a tiny JSON API that persists the tod/ single-page app's state inside a Cloudfla</p>
+                <span class="arrow">→</span>
+            </a>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 My Portfolio | Built with ❤️ and deployed on Cloudflare Pages</p>
+        </footer>
+    </div>
+</body>
+</html>

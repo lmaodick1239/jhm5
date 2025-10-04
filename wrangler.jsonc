@@ -1,0 +1,31 @@
+{
+  // Cloudflare Pages Configuration
+  // This file configures your project for deployment to Cloudflare Pages
+  
+  "name": "my-portfolio",
+  
+  // Specify compatibility date for Cloudflare Workers/Pages runtime
+  "compatibility_date": "2025-01-01",
+  
+  // Pages-specific configuration
+  "pages_build_output_dir": "./public"
+  
+  // Optional: Environment variables for production
+  // "vars": {
+  //   "ENVIRONMENT": "production"
+  // },
+  
+  // Optional: Configure custom domains (after deployment)
+  // "routes": [
+  //   {
+  //     "pattern": "portfolio.yourdomain.com",
+  //     "custom_domain": true
+  //   }
+  // ],
+  
+  // Optional: Define build command if you have a build step
+  // Note: For this static portfolio, we use the generate script
+  // "build": {
+  //   "command": "npm run generate"
+  // }
+}

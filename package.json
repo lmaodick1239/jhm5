@@ -1,0 +1,28 @@
+{
+  "name": "my-portfolio",
+  "version": "1.0.0",
+  "description": "A portfolio index page that automatically lists all projects in the /public directory",
+  "main": "index.html",
+  "scripts": {
+    "generate": "node scripts/generate-index.js",
+    "generate:no-build": "node scripts/generate-index.js --no-build",
+    "preview": "npm run generate && npx serve public",
+    "deploy": "npm run generate && npx wrangler pages deploy public",
+    "dev": "npx serve public",
+    "clean": "rimraf public && rimraf src/*/dist"
+  },
+  "keywords": [
+    "portfolio",
+    "cloudflare",
+    "pages",
+    "static-site"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
