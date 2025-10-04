@@ -5,7 +5,16 @@ A modern web application to calculate your Hong Kong Diploma of Secondary Educat
 ## Features ✨
 
 - **Best 5 Score Calculation**: Automatically calculates your best 5 subjects
-- **Percentile Ranking**: See where you stand among 42,909+ HK candidates
+- **Advanced Percentile Ranking**: See exactly where you stand among Hong Kong students
+  - Compare against 18,027 day school candidates or 18,850 all candidates who achieved (332A)22+
+  - Toggle between day school and all candidates comparison
+  - See exact number of students you performed better than
+  - View your score range and how many students share it
+  - Get personalized performance messages with visual indicators
+- **Accurate Statistical Placement**: Based on official 2024 HKDSE table3f data
+  - Know your exact percentile (e.g., "94th percentile - Top 6%")
+  - See how many students scored above and below you
+  - Understand your score range context
 - **Visual Analytics**: Interactive charts and graphs showing your performance
 - **University Requirements Check**: Verify if you meet common JUPAS requirements (3322+2, 332A, 222A)
 - **Subject Comparison**: Detailed breakdown of each subject's performance
@@ -193,13 +202,16 @@ This application uses official 2024 HKDSE results statistics from the Hong Kong 
 ## Features Roadmap 🗺️
 
 - [x] Best 5 score calculation
-- [x] Percentile ranking
+- [x] Percentile ranking with accurate 2024 HKDSE data
+- [x] Day school vs all candidates comparison toggle
+- [x] Detailed statistical placement (students above/below, score ranges)
+- [x] Performance messages and visual indicators
 - [x] Visual charts and graphs
 - [x] Subject breakdown table
-- [ ] University requirements checker (3322+2, 332A, 222A)
-- [ ] Detailed CSV data integration
+- [x] University requirements checker (3322+2, 332A, 222A)
 - [ ] Subject-by-subject percentile comparison
 - [ ] Gender-based comparison
+- [ ] Historical year comparisons (2023, 2022, etc.)
 - [ ] PDF report export
 - [ ] Save/share results feature
 

@@ -1,4 +1,20 @@
 import type { Grade } from '../types';
+import { 
+  calculatePercentileFromData, 
+  getPercentileMessage, 
+  getScoreRangeStats,
+  totalCandidates,
+  qualifiedCandidates
+} from './percentileData';
+
+// Re-export percentile utilities for convenience
+export { 
+  calculatePercentileFromData, 
+  getPercentileMessage, 
+  getScoreRangeStats,
+  totalCandidates,
+  qualifiedCandidates
+};
 
 /**
  * Convert DSE grade to point value
@@ -114,29 +130,13 @@ export function check222APattern(
 /**
  * Calculate percentile based on Best 5 score
  * Using table3f data (Best 5 distribution)
+ * @param best5Score - Best 5 score (0-35)
+ * @param useDaySchool - Whether to use day school data (default) or all candidates
+ * @deprecated Use calculatePercentileFromData from percentileData.ts instead
  */
-export function calculatePercentile(best5Score: number): number {
-  // This is a simplified version. In the full implementation,
-  // we'll load actual CSV data and calculate precise percentile
-  const distributionData = [
-    { scoreRange: '35-33', cumulative: 0.7 },
-    { scoreRange: '32-30', cumulative: 2.3 },
-    { scoreRange: '29-27', cumulative: 5.4 },
-    { scoreRange: '26-24', cumulative: 10.6 },
-    { scoreRange: '23-21', cumulative: 19.6 },
-    { scoreRange: '20-18', cumulative: 31.6 },
-    { scoreRange: '17-15', cumulative: 41.5 },
-    { scoreRange: '14-12', cumulative: 44.3 }
-  ];
-
-  // Find matching range
-  for (const range of distributionData) {
-    const [max, min] = range.scoreRange.split('-').map(Number);
-    if (best5Score >= min && best5Score <= max) {
-      return 100 - range.cumulative;
-    }
-  }
-
-  // Default fallback
-  return best5Score > 35 ? 99 : best5Score < 12 ? 1 : 50;
+export function calculatePercentile(best5Score: number, useDaySchool: boolean = true): number {
+  // Import the new function
+  const { calculatePercentileFromData } = require('./percentileData');
+  const result = calculatePercentileFromData(best5Score, useDaySchool);
+  return result.percentile;
 }

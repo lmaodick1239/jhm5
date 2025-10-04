@@ -117,7 +117,7 @@ export default function RequirementsChecker({ chinese, english, math, csd, elect
               ⚠️ You don't currently meet the university entrance requirements
             </p>
             <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-              Consider retaking subjects or exploring alternative pathways.
+              Consider retaking subjects or explore alternative pathways.
             </p>
           </div>
         )}

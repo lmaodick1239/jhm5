@@ -10,19 +10,31 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Divider
+  Switch
 } from '@heroui/react';
 import type { SubjectResult } from '../types';
-import { calculateBest5, calculatePercentile } from '../utils/calculator';
+import { 
+  calculateBest5, 
+  calculatePercentileFromData, 
+  getPercentileMessage,
+  getScoreRangeStats,
+  totalCandidates,
+  qualifiedCandidates
+} from '../utils/calculator';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useState } from 'react';
 
 interface Props {
   results: SubjectResult[];
 }
 
 export default function ResultsDashboard({ results }: Props) {
+  const [useDaySchool, setUseDaySchool] = useState(true);
+  
   const { best5, totalPoints } = calculateBest5(results.map(r => ({ name: r.name, grade: r.grade })));
-  const percentile = calculatePercentile(totalPoints);
+  const percentileData = calculatePercentileFromData(totalPoints, useDaySchool);
+  const percentileMessage = getPercentileMessage(percentileData.percentile);
+  const scoreRangeStats = getScoreRangeStats(totalPoints, useDaySchool);
 
   // Prepare chart data
   const chartData = best5.map(subject => ({
@@ -39,12 +51,30 @@ export default function ResultsDashboard({ results }: Props) {
     return 'danger';
   };
 
+  const candidateType = useDaySchool ? 'Day School' : 'All';
+  const totalSat = useDaySchool ? totalCandidates.daySchool : totalCandidates.allCandidates;
+  const totalQualified = useDaySchool ? qualifiedCandidates.daySchool : qualifiedCandidates.allCandidates;
+
   return (
     <div className="space-y-6">
       {/* Best 5 Score Card */}
       <Card className="shadow-xl border-2 border-blue-200 dark:border-blue-800">
         <CardHeader className="flex flex-col items-start gap-2 pb-2">
-          <h2 className="text-2xl font-bold">🎯 Your Best 5 Score</h2>
+          <div className="flex items-center justify-between w-full">
+            <h2 className="text-2xl font-bold">🎯 Your Best 5 Score</h2>
+            <Switch
+              isSelected={useDaySchool}
+              onValueChange={setUseDaySchool}
+              size="sm"
+            >
+              <span className="text-sm">
+                {useDaySchool ? 'Day School' : 'All Candidates'}
+              </span>
+            </Switch>
+          </div>
+          <p className="text-xs text-gray-500">
+            Comparing against {candidateType} candidates who achieved (332A)22 or above
+          </p>
         </CardHeader>
         <CardBody>
           <div className="flex items-center justify-between mb-6">
@@ -56,27 +86,72 @@ export default function ResultsDashboard({ results }: Props) {
             </div>
             <div className="text-right">
               <Chip 
-                color={getPercentileColor(percentile)} 
+                color={getPercentileColor(percentileData.percentile)} 
                 size="lg" 
                 variant="flat"
                 className="text-lg font-bold px-4 py-2"
               >
-                Top {(100 - percentile).toFixed(1)}%
+                Top {(100 - percentileData.percentile).toFixed(1)}%
               </Chip>
               <p className="text-sm text-gray-500 mt-2">
-                Better than {percentile.toFixed(1)}% of candidates
+                Better than {percentileData.percentile.toFixed(1)}% of qualified candidates
               </p>
             </div>
           </div>
 
           <Progress
-            value={percentile}
-            color={getPercentileColor(percentile)}
+            value={percentileData.percentile}
+            color={getPercentileColor(percentileData.percentile)}
             size="lg"
             className="mb-4"
             showValueLabel={true}
             label="Your Percentile Rank"
           />
+
+          {/* Detailed Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Students You Beat</p>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-300">
+                {percentileData.studentsBelow.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                out of {percentileData.totalStudents.toLocaleString()} qualified
+              </p>
+            </div>
+
+            <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Your Score Range</p>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-300">
+                {percentileData.scoreRange}
+              </p>
+              {scoreRangeStats && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {scoreRangeStats.studentsInRange.toLocaleString()} students in this range
+                </p>
+              )}
+            </div>
+
+            <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Performance</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-300">
+                {percentileMessage.emoji}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {percentileMessage.message}
+              </p>
+            </div>
+          </div>
+
+          {/* Additional Context */}
+          <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
+              📊 <strong>{totalQualified.toLocaleString()}</strong> out of <strong>{totalSat.toLocaleString()}</strong> {candidateType.toLowerCase()} candidates achieved (332A)22 or above in 2024 HKDSE.
+              {percentileData.studentsAbove > 0 && (
+                <> Only <strong>{percentileData.studentsAbove.toLocaleString()}</strong> students scored higher than you.</>
+              )}
+            </p>
+          </div>
         </CardBody>
       </Card>
 
@@ -163,24 +238,24 @@ export default function ResultsDashboard({ results }: Props) {
         <CardBody>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 rounded-lg">
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-300">42,909</p>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-300">{totalQualified.toLocaleString()}</p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Total Candidates
+                Qualified Candidates
               </p>
               <p className="text-xs text-gray-500 mt-2">
-                (Taking 5+ Category A/B subjects)
+                ({candidateType}) achieved (332A)22+
               </p>
             </div>
 
             <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-lg">
               <p className="text-3xl font-bold text-green-600 dark:text-green-300">
-                {percentile > 70 ? '🌟' : percentile > 50 ? '👍' : '💪'}
+                {percentileMessage.emoji}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Your Performance
               </p>
               <p className="text-xs text-gray-500 mt-2">
-                {percentile >= 90 ? 'Outstanding!' : percentile >= 70 ? 'Excellent!' : percentile >= 50 ? 'Good!' : 'Keep improving!'}
+                {percentileMessage.message}
               </p>
             </div>
 

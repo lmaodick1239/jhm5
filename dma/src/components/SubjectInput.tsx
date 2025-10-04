@@ -13,6 +13,7 @@ import type { Grade, CSDGrade, SubjectResult } from '../types';
 import { gradeToPoints } from '../utils/calculator';
 
 const GRADES: Grade[] = ['5**', '5*', '5', '4', '3', '2', '1', 'U'];
+const APPLIED_LEARNING_GRADES: Grade[] = ['4', '3', '2', 'U'];
 
 // HKDSE Category A Elective Subjects (Official list from HKEAA)
 const CATEGORY_A_SUBJECTS = [
@@ -72,6 +73,16 @@ const ALL_ELECTIVE_SUBJECTS = [
   ...CATEGORY_C_SUBJECTS
 ].sort();
 
+// Helper function to check if a subject is Applied Learning
+const isAppliedLearning = (subjectName: string): boolean => {
+  return CATEGORY_B_SUBJECTS.includes(subjectName);
+};
+
+// Helper function to get available grades for a subject
+const getAvailableGrades = (subjectName: string): Grade[] => {
+  return isAppliedLearning(subjectName) ? APPLIED_LEARNING_GRADES : GRADES;
+};
+
 interface Props {
   onCalculate: (
     results: SubjectResult[],
@@ -100,6 +111,32 @@ export default function SubjectInput({ onCalculate }: Props) {
   
   const [hasElective2, setHasElective2] = useState(true);
   const [hasElective3, setHasElective3] = useState(true);
+
+  // Reset grade to valid value when switching to/from Applied Learning
+  const handleSubjectChange = (electiveNum: 1 | 2 | 3, newSubject: string) => {
+    const isNewAppliedLearning = isAppliedLearning(newSubject);
+    const currentGrade = electiveNum === 1 ? elective1Grade : electiveNum === 2 ? elective2Grade : elective3Grade;
+    const availableGrades = getAvailableGrades(newSubject);
+    
+    // If current grade is not available for the new subject, reset to a valid grade
+    if (!availableGrades.includes(currentGrade)) {
+      const newGrade = isNewAppliedLearning ? '3' : '3'; // Default to grade 3
+      if (electiveNum === 1) {
+        setElective1Name(newSubject);
+        setElective1Grade(newGrade as Grade);
+      } else if (electiveNum === 2) {
+        setElective2Name(newSubject);
+        setElective2Grade(newGrade as Grade);
+      } else {
+        setElective3Name(newSubject);
+        setElective3Grade(newGrade as Grade);
+      }
+    } else {
+      if (electiveNum === 1) setElective1Name(newSubject);
+      else if (electiveNum === 2) setElective2Name(newSubject);
+      else setElective3Name(newSubject);
+    }
+  };
 
   const handleCalculate = () => {
     const subjects: SubjectResult[] = [
@@ -155,7 +192,7 @@ export default function SubjectInput({ onCalculate }: Props) {
                 color="primary"
               >
                 {GRADES.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
+                  <SelectItem key={grade}>
                     {grade}
                   </SelectItem>
                 ))}
@@ -171,7 +208,7 @@ export default function SubjectInput({ onCalculate }: Props) {
                 color="primary"
               >
                 {GRADES.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
+                  <SelectItem key={grade}>
                     {grade}
                   </SelectItem>
                 ))}
@@ -187,7 +224,7 @@ export default function SubjectInput({ onCalculate }: Props) {
                 color="primary"
               >
                 {GRADES.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
+                  <SelectItem key={grade}>
                     {grade}
                   </SelectItem>
                 ))}
@@ -219,13 +256,13 @@ export default function SubjectInput({ onCalculate }: Props) {
                 label="Elective 1 Subject"
                 placeholder="Select subject"
                 selectedKeys={[elective1Name]}
-                onChange={(e) => setElective1Name(e.target.value)}
+                onChange={(e) => handleSubjectChange(1, e.target.value)}
                 variant="bordered"
                 color="success"
                 description="Choose your first elective subject"
               >
                 {ALL_ELECTIVE_SUBJECTS.map((subject) => (
-                  <SelectItem key={subject} value={subject}>
+                  <SelectItem key={subject}>
                     {subject}
                   </SelectItem>
                 ))}
@@ -237,9 +274,10 @@ export default function SubjectInput({ onCalculate }: Props) {
                 onChange={(e) => setElective1Grade(e.target.value as Grade)}
                 variant="bordered"
                 color="success"
+                description={isAppliedLearning(elective1Name) ? "Applied Learning: U, 2, 3, 4 only" : undefined}
               >
-                {GRADES.map((grade) => (
-                  <SelectItem key={grade} value={grade}>
+                {getAvailableGrades(elective1Name).map((grade) => (
+                  <SelectItem key={grade}>
                     {grade}
                   </SelectItem>
                 ))}
@@ -260,13 +298,13 @@ export default function SubjectInput({ onCalculate }: Props) {
                   label="Elective 2 Subject"
                   placeholder="Select subject"
                   selectedKeys={[elective2Name]}
-                  onChange={(e) => setElective2Name(e.target.value)}
+                  onChange={(e) => handleSubjectChange(2, e.target.value)}
                   variant="bordered"
                   color="success"
                   description="Choose your second elective subject"
                 >
                   {ALL_ELECTIVE_SUBJECTS.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
+                    <SelectItem key={subject}>
                       {subject}
                     </SelectItem>
                   ))}
@@ -278,9 +316,10 @@ export default function SubjectInput({ onCalculate }: Props) {
                   onChange={(e) => setElective2Grade(e.target.value as Grade)}
                   variant="bordered"
                   color="success"
+                  description={isAppliedLearning(elective2Name) ? "Applied Learning: U, 2, 3, 4 only" : undefined}
                 >
-                  {GRADES.map((grade) => (
-                    <SelectItem key={grade} value={grade}>
+                  {getAvailableGrades(elective2Name).map((grade) => (
+                    <SelectItem key={grade}>
                       {grade}
                     </SelectItem>
                   ))}
@@ -302,13 +341,13 @@ export default function SubjectInput({ onCalculate }: Props) {
                   label="Elective 3 Subject"
                   placeholder="Select subject"
                   selectedKeys={[elective3Name]}
-                  onChange={(e) => setElective3Name(e.target.value)}
+                  onChange={(e) => handleSubjectChange(3, e.target.value)}
                   variant="bordered"
                   color="success"
                   description="Choose your third elective subject"
                 >
                   {ALL_ELECTIVE_SUBJECTS.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
+                    <SelectItem key={subject}>
                       {subject}
                     </SelectItem>
                   ))}
@@ -320,9 +359,10 @@ export default function SubjectInput({ onCalculate }: Props) {
                   onChange={(e) => setElective3Grade(e.target.value as Grade)}
                   variant="bordered"
                   color="success"
+                  description={isAppliedLearning(elective3Name) ? "Applied Learning: U, 2, 3, 4 only" : undefined}
                 >
-                  {GRADES.map((grade) => (
-                    <SelectItem key={grade} value={grade}>
+                  {getAvailableGrades(elective3Name).map((grade) => (
+                    <SelectItem key={grade}>
                       {grade}
                     </SelectItem>
                   ))}
