@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Chalkboard background -->
+  <rect width="100" height="100" fill="#1e3a1e"/>
+  
+  <!-- Math symbols in chalk style -->
+  <text x="20" y="40" font-family="Arial, sans-serif" font-size="35" fill="#f5f5dc" font-weight="bold">2+</text>
+  <text x="20" y="75" font-family="Arial, sans-serif" font-size="35" fill="#f5f5dc" font-weight="bold">2=</text>
+  <text x="65" y="58" font-family="Arial, sans-serif" font-size="45" fill="#90ee90" font-weight="bold">4</text>
+</svg>

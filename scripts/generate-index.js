@@ -101,6 +101,25 @@ function getProjectDirectories() {
 }
 
 /**
+ * Check if project has a build script in package.json
+ */
+function hasBuildScript(projectDir) {
+    const packageJsonPath = path.join(SRC_DIR, projectDir, 'package.json');
+    
+    if (!fs.existsSync(packageJsonPath)) {
+        return false;
+    }
+    
+    try {
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+        return packageJson.scripts && packageJson.scripts.build;
+    } catch (error) {
+        console.log(`⚠️  Could not read package.json for ${projectDir}`);
+        return false;
+    }
+}
+
+/**
  * Extract project metadata from README.md
  */
 function extractProjectMetadata(projectDir) {
@@ -111,6 +130,9 @@ function extractProjectMetadata(projectDir) {
         description: 'Web application project',
         hasVite: false
     };
+
+    // Check if project has a build script
+    metadata.hasVite = hasBuildScript(projectDir);
 
     // Try to extract title from README if it exists
     if (fs.existsSync(readmePath)) {
@@ -178,27 +200,31 @@ function copyProjectToPublic(projectDir, metadata) {
     const destPath = path.join(PUBLIC_DIR, projectDir);
 
     try {
-        // Determine source directory based on project type
-        let sourceDir = srcPath;
+        // Clean destination directory if it exists
+        if (fs.existsSync(destPath)) {
+            fs.rmSync(destPath, { recursive: true, force: true });
+        }
         
+        // Create destination directory
+        fs.mkdirSync(destPath, { recursive: true });
+
+        // Determine source directory based on project type
         if (metadata.hasVite) {
-            // For Vite projects, copy from dist folder
+            // For Vite projects, copy ONLY from dist folder
             const distPath = path.join(srcPath, 'dist');
             if (fs.existsSync(distPath)) {
-                sourceDir = distPath;
+                copyRecursive(distPath, destPath, projectDir);
+                console.log(`✅ Copied ${projectDir}/dist to /public/${projectDir}`);
             } else {
-                console.log(`⚠️  No dist folder found for ${projectDir}, copying root`);
+                console.error(`❌ No dist folder found for ${projectDir} - build may have failed`);
+                return false;
             }
+        } else {
+            // For non-build projects, copy selective files from root
+            copyStaticProject(srcPath, destPath, projectDir);
+            console.log(`✅ Copied ${projectDir} static files to /public/${projectDir}`);
         }
 
-        // Create destination directory
-        if (!fs.existsSync(destPath)) {
-            fs.mkdirSync(destPath, { recursive: true });
-        }
-
-        // Copy files recursively
-        copyRecursive(sourceDir, destPath, projectDir);
-        console.log(`✅ Copied ${projectDir} to /public`);
         return true;
     } catch (error) {
         console.error(`❌ Error copying ${projectDir}:`, error.message);
@@ -207,13 +233,46 @@ function copyProjectToPublic(projectDir, metadata) {
 }
 
 /**
- * Recursively copy directory contents
+ * Copy static project files (non-build projects)
+ */
+function copyStaticProject(src, dest, projectName) {
+    const includeFiles = ['.html', '.css', '.js', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.webp'];
+    const excludeDirs = ['node_modules', '.git', '.vscode', '.wrangler', 'worker'];
+    const excludeFiles = ['.gitignore', 'package.json', 'package-lock.json', 'wrangler.jsonc', 'README.md', 
+                          'vite.config.js', 'vite.config.ts', 'tsconfig.json', 'tsconfig.app.json', 
+                          'tsconfig.node.json', 'eslint.config.js', 'postcss.config.js', 'tailwind.config.js'];
+
+    if (!fs.existsSync(src)) return;
+
+    const items = fs.readdirSync(src);
+    
+    items.forEach(item => {
+        const srcPath = path.join(src, item);
+        const destPath = path.join(dest, item);
+        const itemStats = fs.statSync(srcPath);
+
+        if (itemStats.isDirectory()) {
+            if (!excludeDirs.includes(item)) {
+                if (!fs.existsSync(destPath)) {
+                    fs.mkdirSync(destPath, { recursive: true });
+                }
+                copyStaticProject(srcPath, destPath, projectName);
+            }
+        } else if (itemStats.isFile()) {
+            const ext = path.extname(item).toLowerCase();
+            const shouldInclude = includeFiles.includes(ext) && !excludeFiles.includes(item);
+            
+            if (shouldInclude) {
+                fs.copyFileSync(srcPath, destPath);
+            }
+        }
+    });
+}
+
+/**
+ * Recursively copy directory contents (for dist folders)
  */
 function copyRecursive(src, dest, projectName) {
-    const excludeDirs = ['node_modules', '.git', '.vscode', '.wrangler', 'src', 'worker'];
-    const excludeFiles = ['.gitignore', 'package.json', 'package-lock.json', 'vite.config.js', 
-                          'vite.config.ts', 'tsconfig.json', 'wrangler.jsonc', 'README.md'];
-
     if (!fs.existsSync(src)) return;
 
     const stats = fs.statSync(src);
@@ -228,13 +287,7 @@ function copyRecursive(src, dest, projectName) {
         items.forEach(item => {
             const srcPath = path.join(src, item);
             const destPath = path.join(dest, item);
-            const itemStats = fs.statSync(srcPath);
-
-            if (itemStats.isDirectory() && !excludeDirs.includes(item)) {
-                copyRecursive(srcPath, destPath, projectName);
-            } else if (itemStats.isFile() && !excludeFiles.includes(item)) {
-                fs.copyFileSync(srcPath, destPath);
-            }
+            copyRecursive(srcPath, destPath, projectName);
         });
     } else {
         fs.copyFileSync(src, dest);
@@ -352,18 +405,27 @@ function generateIndex() {
     for (const projectDir of projectDirs) {
         console.log(`\n📦 Processing ${projectDir}...`);
         
-        // Extract metadata
+        // Extract metadata (this now dynamically checks for build script)
         const metadata = extractProjectMetadata(projectDir);
         console.log(`   Name: ${metadata.name}`);
         console.log(`   Description: ${metadata.description}`);
+        console.log(`   Has build script: ${metadata.hasVite ? 'Yes' : 'No'}`);
         
-        // Build if needed
+        // Build if project has a build script
         if (metadata.hasVite) {
-            buildViteProject(projectDir);
+            const buildSuccess = buildViteProject(projectDir);
+            if (!buildSuccess) {
+                console.error(`❌ Skipping ${projectDir} - build failed`);
+                continue;
+            }
         }
         
         // Copy to public
-        copyProjectToPublic(projectDir, metadata);
+        const copySuccess = copyProjectToPublic(projectDir, metadata);
+        if (!copySuccess) {
+            console.error(`❌ Skipping ${projectDir} - copy failed`);
+            continue;
+        }
         
         projectsData.push({ dir: projectDir, metadata });
     }

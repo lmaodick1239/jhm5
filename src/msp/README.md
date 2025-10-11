@@ -1,12 +1,80 @@
-# React + Vite
+# Minesweeper 💣
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A classic Minesweeper game built with React and Material-UI (MUI).
 
-Currently, two official plugins are available:
+## 🎮 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Multiple Difficulty Levels**:
+  - Beginner: 9×9 grid with 10 mines
+  - Intermediate: 16×16 grid with 40 mines
+  - Expert: 16×30 grid with 99 mines
+  - Custom: Configure your own grid size and mine count
+  
+- **Game Features**:
+  - Left-click to reveal cells
+  - Right-click to flag suspected mines
+  - Timer to track your speed
+  - Mine counter showing remaining flags
+  - Win/lose detection
+  - Restart game anytime
 
-## Expanding the ESLint configuration
+- **Material-UI Design**: Beautiful, responsive interface with Material Design
+- **Persistent High Scores**: Best times saved to localStorage
+- **Smooth Animations**: Polished user experience
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Technologies
+
+- **React 19** - UI framework
+- **Material-UI (MUI)** - Component library and theming
+- **Vite** - Build tool
+
+## 📦 Installation
+
+```bash
+npm install
+```
+
+## 🚀 Development
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) to play.
+
+## 🏗️ Build for Production
+
+```bash
+npm run build
+```
+
+## 🎯 How to Play
+
+1. **Left-click** on a cell to reveal it
+2. **Right-click** on a cell to flag it as a mine
+3. **Numbers** indicate how many mines are adjacent to that cell
+4. **Clear all non-mine cells** to win
+5. **Hit a mine** and you lose!
+
+### Tips
+- Start by clicking corners and edges
+- Use the numbers to deduce mine locations
+- Flag all mines to help track your progress
+- The first click is always safe
+
+## 📁 Project Structure
+
+```
+src/
+├── App.jsx           # Main game logic and UI
+├── Board.jsx         # Game board component
+├── Cell.jsx          # Individual cell component
+├── theme.js          # MUI theme configuration
+└── main.jsx          # Application entry point
+```
+
+## 🎨 Customization
+
+- Edit `src/theme.js` to customize colors and Material-UI theme
+- Modify difficulty presets in `App.jsx`
+- Adjust cell size and styling in `Cell.jsx`
