@@ -9,10 +9,12 @@ import GameScreen from './components/GameScreen';
 function App() {
   const [currentView, setCurrentView] = useState('menu'); // 'menu' or 'game'
   const [gameMode, setGameMode] = useState(null); // 'EASY', 'MEDIUM', 'HARD', or 'INFINITY'
+  const [useInputMode, setUseInputMode] = useState(false);
 
   // Handle starting the game with selected mode
-  const handleStartGame = (mode) => {
+  const handleStartGame = (mode, inputMode) => {
     setGameMode(mode);
+    setUseInputMode(inputMode);
     setCurrentView('game');
   };
 
@@ -27,7 +29,7 @@ function App() {
       {currentView === 'menu' ? (
         <MainMenu onStartGame={handleStartGame} />
       ) : (
-        <GameScreen mode={gameMode} onBackToMenu={handleBackToMenu} />
+        <GameScreen mode={gameMode} onBackToMenu={handleBackToMenu} useInputMode={useInputMode} />
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, CardBody, Progress, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
+import { Button, Card, CardBody, Progress, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch, Input } from '@heroui/react';
 import {
   generateQuestion,
   DIFFICULTY_LEVELS,
@@ -13,7 +13,7 @@ import {
  * GameScreen Component
  * Main game interface with questions, answers, score tracking, and game logic
  */
-const GameScreen = ({ mode, onBackToMenu }) => {
+const GameScreen = ({ mode, onBackToMenu, useInputMode }) => {
   // Game state
   const [score, setScore] = useState(0);
   const [questionNumber, setQuestionNumber] = useState(1);
@@ -25,6 +25,9 @@ const GameScreen = ({ mode, onBackToMenu }) => {
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [timeLeft, setTimeLeft] = useState(10);
   const [timerId, setTimerId] = useState(null);
+  const [inputValue, setInputValue] = useState('');
+  const [inputValidation, setInputValidation] = useState(null); // null, 'correct', or 'wrong'
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
   const { isOpen: isGameOverOpen, onOpen: onGameOverOpen, onClose: onGameOverClose } = useDisclosure();
 
@@ -74,12 +77,21 @@ const GameScreen = ({ mode, onBackToMenu }) => {
     setSelectedAnswer(null);
     setIsAnswerLocked(false);
     setTimeLeft(10); // Reset timer for new question
+    setInputValue('');
+    setInputValidation(null);
+    setShowCorrectAnswer(false);
   };
 
   // Handle timeout
   const handleTimeout = () => {
     setIsAnswerLocked(true);
     setSelectedAnswer(null); // No answer was selected
+
+    // Show correct answer in input mode
+    if (useInputMode) {
+      setInputValidation('wrong');
+      setShowCorrectAnswer(true);
+    }
 
     // Timeout counts as wrong answer
     if (isInfinityMode) {
@@ -91,7 +103,7 @@ const GameScreen = ({ mode, onBackToMenu }) => {
       }
     }
 
-    // Wait 1 second before moving to next question
+    // Wait 1.5 seconds before moving to next question (longer to see correct answer)
     setTimeout(() => {
       if (isInfinityMode) {
         // Continue to next question
@@ -106,7 +118,7 @@ const GameScreen = ({ mode, onBackToMenu }) => {
           generateNewQuestion();
         }
       }
-    }, 1000);
+    }, useInputMode ? 1500 : 1000);
   };
 
   // Handle answer selection
@@ -154,6 +166,63 @@ const GameScreen = ({ mode, onBackToMenu }) => {
         }
       }
     }, 1000);
+  };
+
+  // Handle input submission
+  const handleInputSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (isAnswerLocked || !inputValue.trim()) return;
+
+    // Clear any existing timer
+    if (timerId) {
+      clearTimeout(timerId);
+    }
+
+    const userAnswer = parseInt(inputValue.trim(), 10);
+    
+    // Check if it's a valid number
+    if (isNaN(userAnswer)) {
+      return;
+    }
+
+    setIsAnswerLocked(true);
+    const isCorrect = userAnswer === currentQuestion.correctAnswer;
+
+    if (isCorrect) {
+      // Correct answer
+      setInputValidation('correct');
+      setScore(score + POINTS_PER_CORRECT);
+      setShowCorrectAnswer(false);
+    } else {
+      // Wrong answer
+      setInputValidation('wrong');
+      setShowCorrectAnswer(true);
+      if (isInfinityMode) {
+        setLives(lives - 1);
+        if (lives - 1 <= 0) {
+          // Game over in Infinity Mode
+          handleGameOver();
+          return;
+        }
+      }
+    }
+
+    // Wait 1.5 seconds before moving to next question
+    setTimeout(() => {
+      if (isInfinityMode) {
+        // Continue to next question
+        setQuestionNumber(questionNumber + 1);
+        generateNewQuestion();
+      } else {
+        // Check if standard mode is complete
+        if (questionNumber >= totalQuestions) {
+          handleGameOver();
+        } else {
+          setQuestionNumber(questionNumber + 1);
+          generateNewQuestion();
+        }
+      }
+    }, 1500);
   };
 
   // Handle game over
@@ -281,38 +350,78 @@ const GameScreen = ({ mode, onBackToMenu }) => {
           </CardBody>
         </Card>
 
-        {/* Answer Buttons */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {currentQuestion.answers.map((answer, index) => {
-            const isCorrect = answer === currentQuestion.correctAnswer;
-            const isSelected = answer === selectedAnswer;
-            const showResult = isAnswerLocked;
-            
-            let buttonClasses = 'chalk-border text-4xl py-12 font-bold';
-            
-            if (showResult) {
-              if (isCorrect) {
-                buttonClasses += ' !bg-green-800 !text-white border-green-600';
-              } else if (isSelected) {
-                buttonClasses += ' !bg-red-800 !text-white border-red-600 pulse-animation';
-              }
-            }
-            
-            return (
-              <Button
-                key={index}
+        {/* Answer Section - Conditional rendering based on mode */}
+        {useInputMode ? (
+          // Input Mode
+          <div className="mb-6">
+            <form onSubmit={handleInputSubmit}>
+              {showCorrectAnswer && inputValidation === 'wrong' && (
+                <div className="mb-3 text-center">
+                  <p className="text-2xl chalk-text text-chalk-green font-bold">
+                    ✓ Correct Answer: {currentQuestion.correctAnswer}
+                  </p>
+                </div>
+              )}
+              <Input
+                type="number"
                 size="lg"
-                color={getButtonColor(answer)}
-                variant={getButtonVariant(answer)}
-                className={buttonClasses}
-                onClick={() => handleAnswerSelect(answer)}
+                placeholder="Type answer and press Enter..."
+                value={inputValue}
+                onValueChange={setInputValue}
                 isDisabled={isAnswerLocked}
-              >
-                {answer}
-              </Button>
-            );
-          })}
-        </div>
+                isInvalid={inputValidation === 'wrong'}
+                color={inputValidation === 'correct' ? 'success' : inputValidation === 'wrong' ? 'danger' : 'default'}
+                classNames={{
+                  input: 'text-4xl text-center font-bold',
+                  inputWrapper: inputValidation === 'correct' 
+                    ? 'border-4 border-green-500 !bg-green-900/20' 
+                    : inputValidation === 'wrong' 
+                    ? 'border-4 border-red-500 !bg-red-900/20'
+                    : 'chalk-border',
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleInputSubmit(e);
+                  }
+                }}
+                autoFocus
+              />
+            </form>
+          </div>
+        ) : (
+          // Button Mode
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {currentQuestion.answers.map((answer, index) => {
+              const isCorrect = answer === currentQuestion.correctAnswer;
+              const isSelected = answer === selectedAnswer;
+              const showResult = isAnswerLocked;
+              
+              let buttonClasses = 'chalk-border text-4xl py-12 font-bold';
+              
+              if (showResult) {
+                if (isCorrect) {
+                  buttonClasses += ' !bg-green-800 !text-white border-green-600';
+                } else if (isSelected) {
+                  buttonClasses += ' !bg-red-800 !text-white border-red-600 pulse-animation';
+                }
+              }
+              
+              return (
+                <Button
+                  key={index}
+                  size="lg"
+                  color={getButtonColor(answer)}
+                  variant={getButtonVariant(answer)}
+                  className={buttonClasses}
+                  onClick={() => handleAnswerSelect(answer)}
+                  isDisabled={isAnswerLocked}
+                >
+                  {answer}
+                </Button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Back Button */}
         <Button

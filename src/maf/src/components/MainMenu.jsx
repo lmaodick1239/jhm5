@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@heroui/react';
+import { Button, Card, CardBody, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Switch } from '@heroui/react';
 import { getHighScore } from '../utils/gameUtils';
 
 /**
@@ -8,6 +8,7 @@ import { getHighScore } from '../utils/gameUtils';
  */
 const MainMenu = ({ onStartGame }) => {
   const [highScore, setHighScore] = useState(0);
+  const [useInputMode, setUseInputMode] = useState(false);
   const { isOpen: isInstructionsOpen, onOpen: onInstructionsOpen, onClose: onInstructionsClose } = useDisclosure();
   const { isOpen: isAboutOpen, onOpen: onAboutOpen, onClose: onAboutClose } = useDisclosure();
   const { isOpen: isModeSelectOpen, onOpen: onModeSelectOpen, onClose: onModeSelectClose } = useDisclosure();
@@ -19,7 +20,7 @@ const MainMenu = ({ onStartGame }) => {
 
   const handleStartGame = (mode) => {
     onModeSelectClose();
-    onStartGame(mode);
+    onStartGame(mode, useInputMode);
   };
 
   return (
@@ -95,6 +96,20 @@ const MainMenu = ({ onStartGame }) => {
             >
               🏆 High Score: {highScore}
             </Button>
+          </div>
+
+          {/* Input Mode Toggle */}
+          <div className="mt-4 flex justify-center">
+            <Switch
+              isSelected={useInputMode}
+              onValueChange={setUseInputMode}
+              color="primary"
+              size="lg"
+            >
+              <span className="text-lg chalk-text ml-2">
+                {useInputMode ? '⌨️ Keyboard Input Mode' : '🖱️ Button Click Mode'}
+              </span>
+            </Switch>
           </div>
         </div>
 
@@ -242,6 +257,14 @@ const MainMenu = ({ onStartGame }) => {
                 </div>
 
                 <div>
+                  <h4 className="text-2xl font-bold text-chalk-yellow mb-2">Answer Methods</h4>
+                  <p>• <strong>Button Mode:</strong> Click the correct answer from four choices</p>
+                  <p>• <strong>Input Mode:</strong> Type your answer using the keyboard</p>
+                  <p className="text-sm opacity-80 ml-6 mt-1">Toggle between modes during gameplay!</p>
+                  <p className="text-sm opacity-80 ml-6">✓ Green borders = Correct | ✗ Red borders = Wrong</p>
+                </div>
+
+                <div>
                   <h4 className="text-2xl font-bold text-chalk-yellow mb-2">Scoring</h4>
                   <p>• Each correct answer: <strong className="text-chalk-green">+100 points</strong></p>
                   <p>• Your highest score in Infinity Mode is saved automatically!</p>
@@ -274,6 +297,7 @@ const MainMenu = ({ onStartGame }) => {
                   <h4 className="text-2xl font-bold text-chalk-yellow mb-2">Answer Feedback</h4>
                   <p>• Correct answer highlights in <span className="text-chalk-green font-bold">green</span></p>
                   <p>• Wrong answer highlights in <span className="text-chalk-red font-bold">red</span></p>
+                  <p>• In Input Mode: Wrong answers show the correct answer above the text box</p>
                   <p>• Short pause after each answer before next question</p>
                 </div>
               </div>
