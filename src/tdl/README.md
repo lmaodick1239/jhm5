@@ -1,6 +1,9 @@
-# Advanced To-Do List Application 📝
+# Client Side To-Do List Application 📝 (React + LocalStorage)
 
-A comprehensive task management application built with React, featuring Kanban-style columns, advanced filtering, statistics, and customizable tags and priorities.
+**Client Version:** React 19 with Vite  
+**Storage Version:** Browser LocalStorage
+
+A comprehensive task management application built with React, featuring Kanban-style columns, advanced filtering, statistics, and **browser-based localStorage** for local data persistence.
 
 ## ✨ Features
 
@@ -187,9 +190,20 @@ Possible features to add:
 - Export/import task data
 - Subtasks and checklists
 - Task history and activity log
-- Cloud synchronization
+- Cloud synchronization (see `/tod` for cloud version)
 - Collaboration features
+
+## 🆚 Comparison with /tod
+
+| Feature | /tdl (LocalStorage) | /tod (Cloudflare KV) |
+|---------|---------------------|----------------------|
+| Storage | Browser localStorage | Cloudflare KV (cloud) |
+| Cross-Device | ❌ No | ✅ Yes |
+| Data Backup | ❌ No | ✅ Yes (cloud) |
+| Offline Support | ✅ Yes | ✅ Yes (with fallback) |
+| Setup Complexity | ✅ Simple | ⚠️ Requires Cloudflare account |
+| Cost | ✅ Free | ✅ Free (Cloudflare free tier) |
 
 ---
 
-**Note**: This is a React version of the to-do application. A vanilla JavaScript version is available in the `tod/` directory.
+**Note**: This is the localStorage version of the to-do application. A cloud-enhanced version with Cloudflare KV storage is available in the `/tod` directory.

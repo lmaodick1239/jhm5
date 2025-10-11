@@ -422,10 +422,10 @@ function generateIndex() {
         
         // Copy to public
         const copySuccess = copyProjectToPublic(projectDir, metadata);
-        if (!copySuccess) {
-            console.error(`❌ Skipping ${projectDir} - copy failed`);
-            continue;
-        }
+        // if (!copySuccess) {
+        //     console.error(`❌ Skipping ${projectDir} - copy failed`);
+        //     continue;
+        // }
         
         projectsData.push({ dir: projectDir, metadata });
     }

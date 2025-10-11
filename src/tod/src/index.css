@@ -1,0 +1,68 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e9ecef;
+}
+
+input, textarea, select {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #333333;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* Dark mode styles for form elements */
+.app.dark input,
+.app.dark textarea,
+.app.dark select {
+  background-color: #2d2d2d;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.app.dark input:focus,
+.app.dark textarea:focus,
+.app.dark select:focus {
+  border-color: #4a90e2;
+}
+
+.app.dark button {
+  background-color: #404040;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+.app.dark button:hover {
+  background-color: #505050;
+}
