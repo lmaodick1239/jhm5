@@ -8,7 +8,16 @@
   "compatibility_date": "2025-01-01",
   
   // Pages-specific configuration
-  "pages_build_output_dir": "./public"
+  "pages_build_output_dir": "./public",
+  
+  // KV namespace bindings for the TOD app
+  "kv_namespaces": [
+    {
+      "binding": "TOD_KV",
+      "id": "41a69c0f17014c42a7d9ab630f46fcac",
+      "preview_id": "e6c74278e75e4072a9946641c27c85d2"
+    }
+  ]
   
   // Optional: Environment variables for production
   // "vars": {
